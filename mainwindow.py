@@ -5,6 +5,7 @@ import requests
 from PIL import Image, ImageQt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from yandexmaps import get_coords
 
 SCREEN_SIZE = [600, 450]
 
@@ -16,7 +17,8 @@ class Example(QWidget):
         self.initUI()
 
     def getImage(self):
-        map_request = "http://static-maps.yandex.ru/1.x/?ll=37.530887,55.703118&spn=0.002,0.002&l=map"
+        coords = get_coords('Калининград')
+        map_request = f"http://static-maps.yandex.ru/1.x/?ll={','.join(coords)}8&spn=0.002,0.002&l=map"
         response = requests.get(map_request)
 
         if not response:
