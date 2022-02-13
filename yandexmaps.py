@@ -4,13 +4,6 @@ import requests
 API_KEY = '40d1649f-0493-4b70-98ba-98533de7710b'
 
 
-def get_coords_2(objname):
-    req = f'http://geocode-maps.yandex.ru/1.x/?apikey={API_KEY}&geocode={objname}&format=json'
-    coords = requests.get(req).json()
-    result = coords["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["boundedBy"]["Envelope"]["lowerCorner"]
-    return result.split()
-
-
 def get_coords(address):
     toponym = geocode(address)
     if not toponym:
