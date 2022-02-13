@@ -4,6 +4,14 @@ import requests
 API_KEY = '40d1649f-0493-4b70-98ba-98533de7710b'
 
 
+def get_full_address(address):
+    toponym = geocode(address)
+    if not toponym:
+        return None, None
+    return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
+
+
+
 def get_coords(address):
     toponym = geocode(address)
     if not toponym:

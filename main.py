@@ -4,11 +4,11 @@ from io import BytesIO
 import requests
 from PIL import Image, ImageQt
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QTextBrowser
 from PyQt5.Qt import Qt
-from yandexmaps import get_coords
+from yandexmaps import get_coords, get_full_address
 
-SCREEN_SIZE = [700, 550]
+SCREEN_SIZE = [800, 550]
 
 
 class Example(QWidget):
@@ -58,18 +58,21 @@ class Example(QWidget):
 
         # button
         button = QPushButton('Схема', self)
-        button.move(SCREEN_SIZE[0] - 80, SCREEN_SIZE[1] - (SCREEN_SIZE[1] // 20 * 20))
+        button.move(SCREEN_SIZE[0] - 180, SCREEN_SIZE[1] - (SCREEN_SIZE[1] // 20 * 20))
         button.clicked.connect(self.set_layer_map)
+        button.resize(160, 25)
 
         # button
         button2 = QPushButton('Спутник', self)
-        button2.move(SCREEN_SIZE[0] - 80, SCREEN_SIZE[1] - (SCREEN_SIZE[1] // 20 * 19))
+        button2.move(SCREEN_SIZE[0] - 180, SCREEN_SIZE[1] - (SCREEN_SIZE[1] // 20 * 19))
         button2.clicked.connect(self.set_layer_sat)
+        button2.resize(160, 25)
 
         # button
         button3 = QPushButton('Гибрид', self)
-        button3.move(SCREEN_SIZE[0] - 80, SCREEN_SIZE[1] - (SCREEN_SIZE[1] // 20 * 18))
+        button3.move(SCREEN_SIZE[0] - 180, SCREEN_SIZE[1] - (SCREEN_SIZE[1] // 20 * 18))
         button3.clicked.connect(self.set_layer_gib)
+        button3.resize(160, 25)
 
         # search line
         self.search_line = QLineEdit(self)
@@ -78,15 +81,20 @@ class Example(QWidget):
 
         # search button
         search_button = QPushButton('Искать', self)
-        search_button.move(SCREEN_SIZE[0] // 20 * 16, SCREEN_SIZE[1] - 50)
+        search_button.move(SCREEN_SIZE[0] - 180, SCREEN_SIZE[1] - 50)
         search_button.clicked.connect(self.search_by_address)
-        search_button.resize(100, 32)
+        search_button.resize(160, 32)
 
         # remove marker button
         remove_marker_button = QPushButton('Сброс поискового\nрезультата', self)
-        remove_marker_button.move(SCREEN_SIZE[0] // 20 * 16, SCREEN_SIZE[1] - 100)
+        remove_marker_button.move(SCREEN_SIZE[0] - 180, SCREEN_SIZE[1] - 100)
         remove_marker_button.clicked.connect(self.remove_target_marker)
-        remove_marker_button.resize(100, 50)
+        remove_marker_button.resize(160, 50)
+
+        # address browser
+        self.address_browser = QTextBrowser(self)
+        self.address_browser.move(SCREEN_SIZE[0] - 180, SCREEN_SIZE[1] // 5)
+        self.address_browser.resize(160, 300)
 
     def search_by_address(self):
         request = self.search_line.text()
@@ -97,13 +105,16 @@ class Example(QWidget):
         self.target_coordinates = object_coordinates
         self.target_marker_is = True
         self.update_image()
-        self.search_line.clear()
+        full_address = get_full_address(request)
+        self.address_browser.setText(full_address)
 
     def remove_target_marker(self):
         if self.target_marker_is:
             self.markers.pop(0)
             self.target_marker_is = False
             self.update_image()
+            self.address_browser.clear()
+            self.search_line.clear()
 
     def set_layer_map(self):
         self.target_layer = 'map'
