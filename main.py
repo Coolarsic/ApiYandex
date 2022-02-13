@@ -18,6 +18,7 @@ class Example(QWidget):
         self.target_coordinates = list(map(float, get_coords(self.target_place)))
         self.target_scale = 0.004
         self.target_layer = 'map'
+        self.target_index = ''
         self.target_marker_is = False
         self.show_index = False
         self.markers = []
@@ -113,6 +114,8 @@ class Example(QWidget):
         self.target_marker_is = True
         self.update_image()
         full_address = get_full_address(request)
+        self.target_place = full_address[0]
+        self.target_index = full_address[1]
         if not self.show_index:
             self.address_browser.setText(full_address[0])
         else:
@@ -122,8 +125,10 @@ class Example(QWidget):
         self.show_index = not self.show_index
         if self.show_index:
             self.index_button.setText('Скрывать почтовый\nиндекс')
+            self.address_browser.setText(', '.join([self.target_place] + [self.target_index]))
         else:
             self.index_button.setText('Показывать почтовый\nиндекс')
+            self.address_browser.setText(self.target_place)
 
     def remove_target_marker(self):
         if self.target_marker_is:
