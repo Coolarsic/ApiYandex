@@ -19,6 +19,7 @@ class Example(QWidget):
         self.target_scale = 0.004
         self.target_layer = 'map'
         self.target_marker_is = False
+        self.show_index = False
         self.markers = []
         self.getImage()
         self.initUI()
@@ -94,7 +95,13 @@ class Example(QWidget):
         # address browser
         self.address_browser = QTextBrowser(self)
         self.address_browser.move(SCREEN_SIZE[0] - 180, SCREEN_SIZE[1] // 5)
-        self.address_browser.resize(160, 300)
+        self.address_browser.resize(160, 250)
+
+        # turn on off button index
+        self.index_button = QPushButton('Показывать почтовый\nиндекс', self)
+        self.index_button.move(SCREEN_SIZE[0] - 180, SCREEN_SIZE[1] - 150)
+        self.index_button.clicked.connect(self.turn_on_off_index)
+        self.index_button.resize(160, 50)
 
     def search_by_address(self):
         request = self.search_line.text()
@@ -106,7 +113,17 @@ class Example(QWidget):
         self.target_marker_is = True
         self.update_image()
         full_address = get_full_address(request)
-        self.address_browser.setText(full_address)
+        if not self.show_index:
+            self.address_browser.setText(full_address[0])
+        else:
+            self.address_browser.setText(', '.join(full_address))
+
+    def turn_on_off_index(self):
+        self.show_index = not self.show_index
+        if self.show_index:
+            self.index_button.setText('Скрывать почтовый\nиндекс')
+        else:
+            self.index_button.setText('Показывать почтовый\nиндекс')
 
     def remove_target_marker(self):
         if self.target_marker_is:

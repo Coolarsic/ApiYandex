@@ -8,7 +8,8 @@ def get_full_address(address):
     toponym = geocode(address)
     if not toponym:
         return None, None
-    return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
+    return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted'],\
+           toponym['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
 
 
 
