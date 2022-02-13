@@ -4,26 +4,37 @@ from io import BytesIO
 import requests
 from PIL import Image, ImageQt
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit
 from PyQt5.Qt import Qt
 from yandexmaps import get_coords
 
-SCREEN_SIZE = [600, 450]
+SCREEN_SIZE = [700, 550]
 
 
 class Example(QWidget):
     def __init__(self):
         super().__init__()
-        self.target_place = 'Калининград, Советский Проспект, 192'
+        self.target_place = 'Калининград, Советский Проспект, 159'
         self.target_coordinates = list(map(float, get_coords(self.target_place)))
         self.target_scale = 0.004
         self.target_layer = 'map'
+        self.markers = []
         self.getImage()
         self.initUI()
 
     def getImage(self):
+        # self.target_coordinates = list(map(float, get_coords(self.target_place)))
+        if len(self.markers) != 0:
+            markers = '&pt='
+            temp_markers = []
+            for marker in self.markers:
+                temp_markers.append(''.join(list(map(str, marker))))
+            markers += '~'.join(temp_markers)
+        else:
+            markers = ''
         coords = map(str, self.target_coordinates)
-        map_request = f"http://static-maps.yandex.ru/1.x/?ll={','.join(coords)}&spn={self.target_scale},{self.target_scale}&l={self.target_layer}"
+        map_request = f"http://static-maps.yandex.ru/1.x/?ll={','.join(coords)}&spn={self.target_scale},{self.target_scale}&l={self.target_layer}{markers}"
+        print(map_request)
         response = requests.get(map_request)
 
         if not response:
@@ -46,18 +57,40 @@ class Example(QWidget):
 
         # button
         button = QPushButton('Схема', self)
-        button.move(SCREEN_SIZE[0] - 100, SCREEN_SIZE[1] - 120)
+        button.move(SCREEN_SIZE[0] - 80, SCREEN_SIZE[1] - (SCREEN_SIZE[1] // 20 * 20))
         button.clicked.connect(self.set_layer_map)
 
         # button
         button2 = QPushButton('Спутник', self)
-        button2.move(SCREEN_SIZE[0] - 100, SCREEN_SIZE[1] - 90)
+        button2.move(SCREEN_SIZE[0] - 80, SCREEN_SIZE[1] - (SCREEN_SIZE[1] // 20 * 19))
         button2.clicked.connect(self.set_layer_sat)
 
         # button
         button3 = QPushButton('Гибрид', self)
-        button3.move(SCREEN_SIZE[0] - 100, SCREEN_SIZE[1] - 60)
+        button3.move(SCREEN_SIZE[0] - 80, SCREEN_SIZE[1] - (SCREEN_SIZE[1] // 20 * 18))
         button3.clicked.connect(self.set_layer_gib)
+
+        # search line
+        self.search_line = QLineEdit(self)
+        self.search_line.move(SCREEN_SIZE[0] - (SCREEN_SIZE[0] // 20 * 19), SCREEN_SIZE[1] - 50)
+        self.search_line.resize(500, 32)
+
+        # search button
+        search_button = QPushButton('Искать', self)
+        search_button.move(SCREEN_SIZE[0] // 20 * 16, SCREEN_SIZE[1] - 50)
+        search_button.clicked.connect(self.search_by_address)
+        search_button.resize(100, 32)
+
+    def search_by_address(self):
+        request = self.search_line.text()
+        object_coordinates = list(map(float, get_coords(request)))
+        if self.markers:
+            self.markers.pop(0)
+        self.markers.append([object_coordinates[0], ',', object_coordinates[1], ',', 'pm2', 'rd', 'm'])
+        self.target_coordinates = object_coordinates
+        self.update_image()
+        self.search_line.clear()
+
 
     def set_layer_map(self):
         self.target_layer = 'map'
@@ -70,8 +103,6 @@ class Example(QWidget):
     def set_layer_gib(self):
         self.target_layer = 'sat,skl'
         self.update_image()
-
-
 
     def update_image(self):
         self.getImage()
