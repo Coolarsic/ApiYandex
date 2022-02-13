@@ -18,6 +18,7 @@ class Example(QWidget):
         self.target_coordinates = list(map(float, get_coords(self.target_place)))
         self.target_scale = 0.004
         self.target_layer = 'map'
+        self.target_marker_is = False
         self.markers = []
         self.getImage()
         self.initUI()
@@ -81,16 +82,28 @@ class Example(QWidget):
         search_button.clicked.connect(self.search_by_address)
         search_button.resize(100, 32)
 
+        # remove marker button
+        remove_marker_button = QPushButton('Сброс поискового\nрезультата', self)
+        remove_marker_button.move(SCREEN_SIZE[0] // 20 * 16, SCREEN_SIZE[1] - 100)
+        remove_marker_button.clicked.connect(self.remove_target_marker)
+        remove_marker_button.resize(100, 50)
+
     def search_by_address(self):
         request = self.search_line.text()
         object_coordinates = list(map(float, get_coords(request)))
-        if self.markers:
+        if self.target_marker_is:
             self.markers.pop(0)
         self.markers.append([object_coordinates[0], ',', object_coordinates[1], ',', 'pm2', 'rd', 'm'])
         self.target_coordinates = object_coordinates
+        self.target_marker_is = True
         self.update_image()
         self.search_line.clear()
 
+    def remove_target_marker(self):
+        if self.target_marker_is:
+            self.markers.pop(0)
+            self.target_marker_is = False
+            self.update_image()
 
     def set_layer_map(self):
         self.target_layer = 'map'
