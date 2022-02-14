@@ -16,8 +16,6 @@ def screen_to_geo(pos):
     dx = pos[0] - 300
     lx = ex.target_coordinates[0] + round(dx / 300 * targetscale * 2, 6)
     ly = ex.target_coordinates[1] + round(dy / 225 * targetscale * 2, 6)
-    print(dx, dy)
-
     return round(lx, 6), round(ly, 6)
 
 
@@ -50,7 +48,6 @@ class Example(QWidget):
             markers = ''
         coords = map(str, self.target_coordinates)
         map_request = f"http://static-maps.yandex.ru/1.x/?ll={','.join(coords)}&spn={self.target_scale},{self.target_scale}&l={self.target_layer}{markers}"
-        print(map_request)
         response = requests.get(map_request)
 
         if not response:
