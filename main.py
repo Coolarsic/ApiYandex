@@ -231,7 +231,6 @@ class Example(QWidget):
         if e.button() == Qt.MouseButton.LeftButton:
             dlx, dly = screen_to_geo((e.pos().x(), e.pos().y()))
             text = get_nearest_object((dlx, dly))
-            print(ex.markers)
             ex.markers.clear()
             ex.markers.append([dlx, ',', dly, ',', 'pm2', 'rd', 'm'])
             ex.update_image()
