@@ -5,7 +5,6 @@ API_KEY = '40d1649f-0493-4b70-98ba-98533de7710b'
 lat_step, lon_step = 0.008, 0.02
 
 
-
 def get_nearest_object(point, kind='house'):
     ll = "{0},{1}".format(point[0], point[1])
     geocoder_request = f"http://geocode-maps.yandex.ru/1.x/"
@@ -37,7 +36,6 @@ def get_full_address(address):
         return None, None
     return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted'],\
            toponym['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
-
 
 
 def get_coords(address):
@@ -96,3 +94,36 @@ def lonlat_distance(a, b):
     distance = math.sqrt(dx * dx + dy * dy)
 
     return distance
+
+
+def find_businesses(ll, spn, request, locale="ru_RU"):
+    search_api_server = "https://search-maps.yandex.ru/v1/"
+    api_key = "dda3ddba-c9ea-4ead-9010-f43fbc15c6e3"  # вставить api_key
+    search_params = {
+        "apikey": api_key,
+        "text": request,
+        "lang": locale,
+        "ll": ll,
+        "spn": spn,
+        "type": "biz"
+    }
+
+    response = requests.get(search_api_server, params=search_params)
+    if not response:
+        raise RuntimeError(
+            f"""Ошибка выполнения запроса:
+            {search_api_server}
+            Http статус: {response.status_code} ({response.reason})""")
+
+    # Преобразуем ответ в json-объект
+    json_response = response.json()
+
+    # Получаем первую найденную организацию.
+    organizations = json_response["features"]
+    return organizations
+
+
+def find_business(ll, spn, request, locale="ru_RU"):
+    orgs = find_businesses(ll, spn, request, locale=locale)
+    if len(orgs):
+        return orgs[0]
