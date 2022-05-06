@@ -15,6 +15,7 @@ class Example(QWidget):
     def __init__(self):
         super().__init__()
         self.target_place = 'Калининград, Советский Проспект, 159'
+        self.default_place = True
         self.target_coordinates = list(map(float, get_coords(self.target_place)))
         self.target_scale = 0.004
         self.target_layer = 'map'
@@ -106,6 +107,8 @@ class Example(QWidget):
 
     def search_by_address(self):
         request = self.search_line.text()
+        if not request:
+            return
         object_coordinates = list(map(float, get_coords(request)))
         if self.target_marker_is:
             self.markers.pop(0)
@@ -120,8 +123,11 @@ class Example(QWidget):
             self.address_browser.setText(full_address[0])
         else:
             self.address_browser.setText(', '.join(full_address))
+        self.default_place = False
 
     def turn_on_off_index(self):
+        if self.default_place:
+            return
         self.show_index = not self.show_index
         if self.show_index:
             self.index_button.setText('Скрывать почтовый\nиндекс')
@@ -131,6 +137,8 @@ class Example(QWidget):
             self.address_browser.setText(self.target_place)
 
     def remove_target_marker(self):
+        if self.default_place:
+            return
         if self.target_marker_is:
             self.markers.pop(0)
             self.target_marker_is = False
