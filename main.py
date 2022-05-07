@@ -7,7 +7,7 @@ from PIL import Image, ImageQt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QTextBrowser, QMessageBox
 from PyQt5.Qt import Qt
-from yandexmaps import get_coords, get_full_address, lonlat_distance, get_nearest_object
+from yandexmaps import get_coords, get_full_address, lonlat_distance, get_nearest_object, find_business
 
 
 def screen_to_geo(pos):
@@ -265,6 +265,22 @@ class Example(QWidget):
                 self.target_place = full_address
                 self.target_index = None
                 ex.address_browser.setText(full_address)
+        elif e.button() == Qt.MouseButton.RightButton:
+            coords = list(map(str, screen_to_geo((e.pos().x(), e.pos().y()))))
+            spn = ','.join(['0.005', '0.005'])
+            req = get_nearest_object((float(coords[0]), float(coords[1])))
+            text = find_business(','.join(coords), spn, req)
+            orgcoords = text['geometry']['coordinates']
+            distance_in_meters = lonlat_distance((float(coords[1]), float(coords[0])), (float(orgcoords[1]), float(orgcoords[0])))
+            if distance_in_meters >= 50:
+                pass
+            else:
+                ex.markers.clear()
+                ex.markers.append([float(orgcoords[0]), ',', float(orgcoords[1]), ',', 'pm2', 'rd', 'm'])
+                company_type = text['properties']['CompanyMetaData']['Categories'][0]['name']
+                company_name = text['properties']['name']
+                ex.address_browser.setText(company_type + ' ' + company_name)
+                ex.update_image()
 
 
 if __name__ == '__main__':
