@@ -5,7 +5,7 @@ from io import BytesIO
 import requests
 from PIL import Image, ImageQt
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QTextBrowser
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit, QTextBrowser, QMessageBox
 from PyQt5.Qt import Qt
 from yandexmaps import get_coords, get_full_address, lonlat_distance, get_nearest_object
 
@@ -116,6 +116,13 @@ class Example(QWidget):
 
     def search_by_address(self):
         request = self.search_line.text()
+        if not request:
+            msg = QMessageBox()
+            msg.setWindowTitle("Ошибка")
+            msg.setText("Строчечка поиска то пустая. Надо бы ее заполнить")
+            msg.setIcon(QMessageBox.Warning)
+            msg.exec_()
+            return
         object_coordinates = list(map(float, get_coords(request)))
         if self.target_marker_is:
             self.markers.pop(0)
@@ -132,6 +139,18 @@ class Example(QWidget):
             self.address_browser.setText(', '.join(full_address))
 
     def turn_on_off_index(self):
+        if self.target_index is None:
+            self.show_index = not self.show_index
+            if self.show_index:
+                self.index_button.setText('Скрывать почтовый\nиндекс')
+            else:
+                self.index_button.setText('Показывать почтовый\nиндекс')
+            msg = QMessageBox()
+            msg.setWindowTitle("Ошибка")
+            msg.setText("Короче апи Zндекса не выдает индекс")
+            msg.setIcon(QMessageBox.Warning)
+            msg.exec_()
+            return
         self.show_index = not self.show_index
         if self.show_index:
             self.index_button.setText('Скрывать почтовый\nиндекс')
@@ -234,8 +253,18 @@ class Example(QWidget):
             ex.markers.clear()
             ex.markers.append([dlx, ',', dly, ',', 'pm2', 'rd', 'm'])
             ex.update_image()
-            ex.address_browser.setText(text)
-
+            full_address = get_full_address(text)
+            if type(full_address) == tuple:
+                self.target_index = full_address[-1]
+                self.target_place = full_address[0]
+                if self.show_index:
+                    ex.address_browser.setText(', '.join(full_address))
+                else:
+                    ex.address_browser.setText(full_address[0])
+            else:
+                self.target_place = full_address
+                self.target_index = None
+                ex.address_browser.setText(full_address)
 
 
 if __name__ == '__main__':

@@ -5,7 +5,6 @@ API_KEY = '40d1649f-0493-4b70-98ba-98533de7710b'
 lat_step, lon_step = 0.008, 0.02
 
 
-
 def get_nearest_object(point, kind='house'):
     ll = "{0},{1}".format(point[0], point[1])
     geocoder_request = f"http://geocode-maps.yandex.ru/1.x/"
@@ -35,9 +34,11 @@ def get_full_address(address):
     toponym = geocode(address)
     if not toponym:
         return None, None
-    return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted'],\
-           toponym['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
-
+    try:
+        return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted'],\
+               toponym['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
+    except KeyError:
+        return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
 
 
 def get_coords(address):
